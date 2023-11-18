@@ -9,7 +9,6 @@ import java.util.Map;
 public class ClassDeclarationVisitor extends AbstractVisitor {
 	private Map<String, TypeDeclaration> types = new HashMap<>();
 
-
 	
 	public boolean visit(TypeDeclaration node) {
 		if(!node.isInterface()) {

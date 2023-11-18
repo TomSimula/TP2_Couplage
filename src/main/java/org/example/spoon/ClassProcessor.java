@@ -14,7 +14,7 @@ import spoon.reflect.visitor.filter.TypeFilter;
 public class ClassProcessor extends AbstractProcessor<CtClass<?>>{
 
 
-    private Map<String, Map<String, Integer>> couplage;
+    private Map<String, Map<String, Double>> couplage;
 
     public ClassProcessor() {
         this.couplage = new HashMap<>();
@@ -38,19 +38,19 @@ public class ClassProcessor extends AbstractProcessor<CtClass<?>>{
 
     }
 
-    public Map<String, Map<String, Integer>> getCouplage() {
+    public Map<String, Map<String, Double>> getCouplage() {
         return couplage;
     }
 
     private void processInvocations(CtClass element, List<CtInvocation<?>> invocations) {
-        Map <String, Integer> calls = new HashMap<>();
+        Map <String, Double> calls = new HashMap<>();
         couplage.put(element.getSimpleName(), calls);
         for(CtInvocation<?> inv: invocations) {
             String targetName = inv.getTarget().getType().getSimpleName();
             if(calls.containsKey(targetName)) {
                 calls.put(targetName, calls.get(targetName) + 1);
             } else {
-                calls.put(targetName, 1);
+                calls.put(targetName, 1.0);
             }
         }
     }

@@ -1,5 +1,7 @@
 package org.example.spoon;
+import org.example.Visitors.AbstractVisitor;
 import spoon.Launcher;
+import spoon.processing.AbstractProcessor;
 import spoon.processing.Processor;
 import spoon.reflect.CtModel;
 
@@ -24,12 +26,8 @@ public class SpoonParser {
         return launcher.getModel();
     }
 
-    public void setParser(Processor<?> processor) {
+    public void setProcessor(AbstractProcessor<?> processor) {
         launcher.addProcessor(processor);
-    }
-
-    public void run() {
-        launcher.run();
     }
 
     public void build() {

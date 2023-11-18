@@ -3,6 +3,7 @@ package org.example.process;
 
 import org.example.Config.Config;
 import org.example.Visitors.*;
+import org.example.common.Analyzer;
 import org.eclipse.jdt.core.dom.*;
 
 import java.io.File;
@@ -10,38 +11,48 @@ import java.io.IOException;
 import java.util.*;
 
 
-public class Analyzer {
-    private static final JdtParser parser = new JdtParser();
+public class JDTAnalyzer implements Analyzer {
+    private JdtParser parser;
     private ArrayList<File> javaFiles;
 
     private ClassDeclarationVisitor visitor;
 
 
-    public Analyzer() {
+    public JDTAnalyzer(String projectPath) {
         visitor = new ClassDeclarationVisitor();
-        File folder = new File(Config.projectSourcePath);
+        parser = new JdtParser(projectPath);
+        File folder = new File(projectPath);
         this.javaFiles = listJavaFilesForFolder(folder);
     }
     //Operations
 
     //Merge every call graph of each class
-    public CallGraph buildCallGraph() throws IOException {
-        visitProject();
+    public CallGraph buildCallGraph(){
         CallGraph graph = new CallGraph();
-        for(TypeDeclaration type: visitor.getClasses()) {
-            graph.putClassNode(type.getName().toString(), buildClassCallGraph(type));
+
+        try {
+            visitProject();
+            for(TypeDeclaration type: visitor.getClasses()) {
+                graph.putClassNode(type.getName().toString(), buildClassCallGraph(type));
+            }
+
+        } catch (IOException e) {
+            System.err.println("Invalid project path");
         }
         return graph;
     }
 
     //Create and return the call graph of a class
-    public Map<String, Double> buildClassCallGraph(TypeDeclaration clazz){
+    private Map<String, Double> buildClassCallGraph(TypeDeclaration clazz){
         Map<String, Double> relation = new HashMap<>();
+        System.out.println("visiting methods of " + clazz.getName());
         for(MethodDeclaration method: clazz.getMethods()) {
+            System.out.println("    visiting method " + method.getName());
             MethodInvocationVisitor methodInvocationVisitor = new MethodInvocationVisitor();
             method.accept(methodInvocationVisitor);
             List<MethodInvocation> methodInvocations = methodInvocationVisitor.getMethodInvocations();
             for (MethodInvocation methodInvocation : methodInvocations) {
+                System.out.println("        visiting method invocation " + methodInvocation.getName());
                 Expression expression = methodInvocation.getExpression();
                 ITypeBinding typeBinding;
                 String calleeFullName = "";
@@ -49,9 +60,12 @@ public class Analyzer {
                     // appel de méthode avec 'this' implicite
                     continue;
                 } else {
+                    System.out.println("            expression: " + expression);
+
                     typeBinding = expression.resolveTypeBinding();
                 }
                 if (typeBinding != null) {
+                    System.out.println("            typeBinding: " + typeBinding.getName());
                     // on ne s'interesse pas aux classes à l'exterieur du projet
                     if (!isTypeInProject(typeBinding.getName())) continue;
                     calleeFullName = typeBinding.getName();
@@ -64,21 +78,22 @@ public class Analyzer {
                     }
 
                 }
-                if(!Objects.equals(calleeFullName, ""))
+                if(!Objects.equals(calleeFullName, "")) {
+                    System.out.println("            adding " + calleeFullName);
                     if (relation.containsKey(calleeFullName)) {
                         relation.put(calleeFullName, relation.get(calleeFullName) + 1);
                     } else {
                         relation.put(calleeFullName, 1.0);
                     }
+                }
             }
         }
-        //System.out.println(clazz.getName() + ": " + relation);
         return relation;
 
     }
 
 
-    public boolean isTypeInProject(String name){
+    private boolean isTypeInProject(String name){
         return visitor.getclassByName(name) != null;
     }
 
@@ -97,7 +112,7 @@ public class Analyzer {
     }
 
     //Visit every file with a visitor
-    public void visitProject() throws IOException {
+    private void visitProject() throws IOException {
         for (File fileEntry : javaFiles) {
             CompilationUnit parse = parser.parse(fileEntry);
             parse.accept(visitor);

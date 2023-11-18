@@ -25,6 +25,13 @@ public class CallGraph {
         totalCouplage = 0;
     }
 
+    public CallGraph(Map<String, Map<String, Double>> couplage) {
+        this();
+        for (Map.Entry<String, Map<String, Double>> entry: couplage.entrySet()) {
+            putClassNode(entry.getKey(), entry.getValue());
+        }
+    }
+
 
     public void putClassNode(String s, Map<String, Double> m){
         m.remove(s);

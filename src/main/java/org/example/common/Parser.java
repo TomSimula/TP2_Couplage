@@ -1,4 +1,4 @@
-package main.java.org.example.common;
+package org.example.common;
 
 public abstract class Parser {
 
