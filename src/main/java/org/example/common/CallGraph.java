@@ -1,4 +1,4 @@
-package org.example.process;
+package org.example.common;
 
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultUndirectedWeightedGraph;

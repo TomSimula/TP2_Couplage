@@ -1,7 +1,7 @@
 package org.example.spoon;
 
 import org.example.common.Analyzer;
-import org.example.process.CallGraph;
+import org.example.common.CallGraph;
 
 public class SpoonAnalyzer implements Analyzer {
     private SpoonParser parser;

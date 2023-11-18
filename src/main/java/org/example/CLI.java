@@ -2,8 +2,8 @@ package org.example;
 
 import org.example.Config.Config;
 import org.example.common.Analyzer;
-import org.example.process.JDTAnalyzer;
-import org.example.process.CallGraph;
+import org.example.jdt.JdtAnalyzer;
+import org.example.common.CallGraph;
 import org.example.spoon.SpoonAnalyzer;
 
 import java.io.IOException;
@@ -26,6 +26,7 @@ public class CLI {
         int option = -1;
         setProjectPath();
         setAnalyzer();
+        System.out.println("Analyse du projet en cours...");
         CallGraph cg = anal.buildCallGraph();
         while(option != 0){
             System.out.println(options);
@@ -77,6 +78,6 @@ public class CLI {
         if(option == 1)
             anal = new SpoonAnalyzer(Config.projectSourcePath);
         else
-            anal = new JDTAnalyzer(Config.projectSourcePath);
+            anal = new JdtAnalyzer(Config.projectSourcePath);
     }
 }

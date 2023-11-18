@@ -1,4 +1,4 @@
-package org.example.process;
+package org.example.common;
 
 public class Module {
     private String name;

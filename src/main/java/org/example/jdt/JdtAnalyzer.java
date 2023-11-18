@@ -1,24 +1,24 @@
-package org.example.process;
+package org.example.jdt;
 
 
-import org.example.Config.Config;
 import org.example.Visitors.*;
 import org.example.common.Analyzer;
 import org.eclipse.jdt.core.dom.*;
+import org.example.common.CallGraph;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
 
-public class JDTAnalyzer implements Analyzer {
+public class JdtAnalyzer implements Analyzer {
     private JdtParser parser;
     private ArrayList<File> javaFiles;
 
     private ClassDeclarationVisitor visitor;
 
 
-    public JDTAnalyzer(String projectPath) {
+    public JdtAnalyzer(String projectPath) {
         visitor = new ClassDeclarationVisitor();
         parser = new JdtParser(projectPath);
         File folder = new File(projectPath);
@@ -45,14 +45,11 @@ public class JDTAnalyzer implements Analyzer {
     //Create and return the call graph of a class
     private Map<String, Double> buildClassCallGraph(TypeDeclaration clazz){
         Map<String, Double> relation = new HashMap<>();
-        System.out.println("visiting methods of " + clazz.getName());
         for(MethodDeclaration method: clazz.getMethods()) {
-            System.out.println("    visiting method " + method.getName());
             MethodInvocationVisitor methodInvocationVisitor = new MethodInvocationVisitor();
             method.accept(methodInvocationVisitor);
             List<MethodInvocation> methodInvocations = methodInvocationVisitor.getMethodInvocations();
             for (MethodInvocation methodInvocation : methodInvocations) {
-                System.out.println("        visiting method invocation " + methodInvocation.getName());
                 Expression expression = methodInvocation.getExpression();
                 ITypeBinding typeBinding;
                 String calleeFullName = "";
@@ -60,12 +57,9 @@ public class JDTAnalyzer implements Analyzer {
                     // appel de méthode avec 'this' implicite
                     continue;
                 } else {
-                    System.out.println("            expression: " + expression);
-
                     typeBinding = expression.resolveTypeBinding();
                 }
                 if (typeBinding != null) {
-                    System.out.println("            typeBinding: " + typeBinding.getName());
                     // on ne s'interesse pas aux classes à l'exterieur du projet
                     if (!isTypeInProject(typeBinding.getName())) continue;
                     calleeFullName = typeBinding.getName();
@@ -79,7 +73,6 @@ public class JDTAnalyzer implements Analyzer {
 
                 }
                 if(!Objects.equals(calleeFullName, "")) {
-                    System.out.println("            adding " + calleeFullName);
                     if (relation.containsKey(calleeFullName)) {
                         relation.put(calleeFullName, relation.get(calleeFullName) + 1);
                     } else {
