@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-public class Parser {
+public class JdtParser extends Parser{
 
 	public static CompilationUnit parse(File fileEntry) throws IOException {
 		ASTParser parser = ASTParser.newParser(AST.JLS4); // java +1.6

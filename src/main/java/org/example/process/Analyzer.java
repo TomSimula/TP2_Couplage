@@ -11,7 +11,7 @@ import java.util.*;
 
 
 public class Analyzer {
-    private static final Parser parser = new Parser();
+    private static final JdtParser parser = new JdtParser();
     private ArrayList<File> javaFiles;
 
     private ClassDeclarationVisitor visitor;
